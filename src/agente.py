@@ -1,28 +1,27 @@
+from .models import Jugador
+from flask import current_app
+from flask_sqlalchemy import SQLAlchemy
 from .api_football import APIFootball
 
+
 class Agente:
-    def __init__(self, api_token):
-        self.api = APIFootball(api_token)
-        self.jugadores = self._cargar_jugadores()  # Aquí llamamos a la función
+    def __init__(self, api_token, api_secret, app=None):
+        self.api = APIFootball(api_token, api_secret)
 
-    def _cargar_jugadores(self):
-        """Carga los datos de los jugadores desde la API."""
-        jugadores = self.api.obtener_ganadores_copa_mundial()
-        print(f"Jugadores cargados desde la API: {jugadores}")  # Debug
-        return jugadores
+        # Si la app no ha sido pasada, la obtenemos de 'current_app'
+        if app is not None:
+            self.app = app
+        else:
+            self.app = current_app._get_current_object()
 
-    def adivinar_jugador(self, respuestas):
-            """Adivina el jugador basado en las respuestas del usuario."""
-            posibles_jugadores = self.jugadores
+        self.paises_campeones = self._cargar_paises_campeones()
 
-            # Filtra los jugadores basado en las respuestas
-            if respuestas.get("año") == "antes de 2000":
-                posibles_jugadores = [j for j in posibles_jugadores if j["dateOfBirth"][:4] < "2000"]
-            if respuestas.get("pais") == "Sudamérica":
-                posibles_jugadores = [j for j in posibles_jugadores if j["nationality"] in ["Brazil", "Argentina", "Uruguay"]]
-            if respuestas.get("posicion") == "Delantero":
-                posibles_jugadores = [j for j in posibles_jugadores if j["position"] == "Attacker"]
+    def _cargar_paises_campeones(self):
+        """Carga los jugadores desde la base de datos dentro del contexto de la aplicación."""
+        with self.app.app_context():  # Se asegura que la app esté en contexto
+            # Acceso a la base de datos dentro del contexto de Flask
+            jugadores = Jugador.query.all()
 
-            # Devuelve el primer jugador que coincida o un mensaje de error
-            return posibles_jugadores[0]["name"] if posibles_jugadores else "No se encontró un jugador."
-            #return "Jugador encontrado"
+            paises = [{"country": jugador.pais, "wins": jugador.ano, "year": jugador.ano} for jugador in jugadores]
+        
+        return paises
