@@ -1,12 +1,22 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from src.agente import Agente
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
 
-# Inicializa el agente con tu API token
-agente = Agente(api_token="95353c8ad2b34088beab0d2003fb5211")
+# Configuración de la base de datos
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://usuario:contraseña@localhost/nombre_base_datos'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Definir las credenciales de la API
+API_TOKEN = "qdOmkHiHj1Yd0EJG"
+API_SECRET = "9UBfzlDdcH0kWUJm7yJsf19y38M3NvJW"
+
+# Crear una instancia del Agente con ambos parámetros
+agente = Agente(api_token=API_TOKEN, api_secret=API_SECRET)
 
 @app.route("/")
 def index():
@@ -16,11 +26,11 @@ def index():
 def iniciar_juego():
     return jsonify({"mensaje": "¡Bienvenido al Adivinador de la Copa Mundial!"})
 
-@app.route("/adivinar", methods=["POST"])
-def adivinar():
-    datos = request.json
-    resultado = agente.adivinar_jugador(datos)
-    return jsonify({"resultado": resultado if resultado else "No se encontró un jugador"})
+@app.route("/adivinar_pais", methods=["POST"])
+def adivinar_pais():
+    respuestas = request.json
+    pais = agente.adivinar_pais(respuestas)
+    return jsonify({"pais": pais})
 
 if __name__ == "__main__":
     app.run(debug=True)
