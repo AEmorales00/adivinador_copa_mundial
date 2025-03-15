@@ -11,18 +11,18 @@ class Agente:
         print(f"Jugadores cargados desde la API: {jugadores}")  # Debug
         return jugadores
 
-def adivinar_jugador(self, respuestas):
-        """Adivina el jugador basado en las respuestas del usuario."""
-        posibles_jugadores = self.jugadores
+    def adivinar_jugador(self, respuestas):
+            """Adivina el jugador basado en las respuestas del usuario."""
+            posibles_jugadores = self.jugadores
 
-        # Filtra los jugadores basado en las respuestas
-        if respuestas.get("año") == "antes de 2000":
-            posibles_jugadores = [j for j in posibles_jugadores if j["dateOfBirth"][:4] < "2000"]
-        if respuestas.get("pais") == "Sudamérica":
-            posibles_jugadores = [j for j in posibles_jugadores if j["nationality"] in ["Brazil", "Argentina", "Uruguay"]]
-        if respuestas.get("posicion") == "Delantero":
-            posibles_jugadores = [j for j in posibles_jugadores if j["position"] == "Attacker"]
+            # Filtra los jugadores basado en las respuestas
+            if respuestas.get("año") == "antes de 2000":
+                posibles_jugadores = [j for j in posibles_jugadores if j["dateOfBirth"][:4] < "2000"]
+            if respuestas.get("pais") == "Sudamérica":
+                posibles_jugadores = [j for j in posibles_jugadores if j["nationality"] in ["Brazil", "Argentina", "Uruguay"]]
+            if respuestas.get("posicion") == "Delantero":
+                posibles_jugadores = [j for j in posibles_jugadores if j["position"] == "Attacker"]
 
-        # Devuelve el primer jugador que coincida o un mensaje de error
-        #return posibles_jugadores[0]["name"] if posibles_jugadores else "No se encontró un jugador."
-        return "Jugador encontrado"
+            # Devuelve el primer jugador que coincida o un mensaje de error
+            return posibles_jugadores[0]["name"] if posibles_jugadores else "No se encontró un jugador."
+            #return "Jugador encontrado"

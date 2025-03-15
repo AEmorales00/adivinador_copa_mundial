@@ -33,12 +33,16 @@ class APIFootball:
         if equipo and "squad" in equipo:
             return equipo["squad"]
         else:
+            print(f"No se encontró el campo 'squad' en la respuesta del equipo {team_id}.")
             return None
 
-    def obtener_partidos_competicion(self, competition_id):
-        """Obtiene los partidos de una competición específica."""
+    def obtener_partidos_competicion(self, competition_id, filters=None):
+        """Obtiene los partidos de una competición específica con filtros opcionales."""
         url = self.base_url + f"competitions/{competition_id}/matches"
-        response = requests.get(url, headers=self.headers)
+        if filters:
+            response = requests.get(url, headers=self.headers, params=filters)
+        else:
+            response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
         else:
@@ -57,18 +61,19 @@ class APIFootball:
 
     def obtener_ganadores_copa_mundial(self):
         """Obtiene los ganadores de la Copa Mundial."""
-        competicion_id = 2000
-        partidos = self.obtener_partidos_competicion(competicion_id)
+        competicion_id = 2000  # ID de la Copa Mundial
+        filters = {
+            "stage": "FINAL",  # Filtro para obtener solo partidos finales
+            "status": "FINISHED"  # Filtro para obtener partidos finalizados
+        }
+        partidos = self.obtener_partidos_competicion(competicion_id, filters)
 
-        if not partidos:
+        if not partidos or "matches" not in partidos:
             print("Error: No se pudieron obtener los partidos de la Copa Mundial.")
             return []
 
-        partidos_finales = [p for p in partidos["matches"] if p.get("stage") == "FINAL"]
-        print(f"Partidos finales encontrados: {partidos_finales}")
-
         ganadores = set()
-        for partido in partidos_finales:
+        for partido in partidos["matches"]:
             if partido["score"].get("winner") == "HOME_TEAM":
                 ganadores.add(partido["homeTeam"]["id"])
             elif partido["score"].get("winner") == "AWAY_TEAM":
