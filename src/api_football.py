@@ -57,28 +57,30 @@ class APIFootball:
 
     def obtener_ganadores_copa_mundial(self):
         """Obtiene los ganadores de la Copa Mundial."""
-        # La Copa Mundial tiene el ID 2000 en la API de Football-Data
         competicion_id = 2000
         partidos = self.obtener_partidos_competicion(competicion_id)
+
         if not partidos:
+            print("Error: No se pudieron obtener los partidos de la Copa Mundial.")
             return []
 
-        # Filtra los partidos de la fase final (eliminatorias)
-        partidos_finales = [p for p in partidos["matches"] if p["stage"] == "FINALS"]
+        partidos_finales = [p for p in partidos["matches"] if p.get("stage") == "FINAL"]
+        print(f"Partidos finales encontrados: {partidos_finales}")
 
-        # Obtiene los equipos ganadores
         ganadores = set()
         for partido in partidos_finales:
-            if partido["score"]["winner"] == "HOME_TEAM":
+            if partido["score"].get("winner") == "HOME_TEAM":
                 ganadores.add(partido["homeTeam"]["id"])
-            elif partido["score"]["winner"] == "AWAY_TEAM":
+            elif partido["score"].get("winner") == "AWAY_TEAM":
                 ganadores.add(partido["awayTeam"]["id"])
 
-        # Obtiene los jugadores de los equipos ganadores
+        print(f"IDs de equipos ganadores: {ganadores}")
+
         jugadores_ganadores = []
         for team_id in ganadores:
             jugadores = self.obtener_jugadores_equipo(team_id)
             if jugadores:
                 jugadores_ganadores.extend(jugadores)
 
+        print(f"Jugadores de equipos ganadores: {jugadores_ganadores}")
         return jugadores_ganadores
